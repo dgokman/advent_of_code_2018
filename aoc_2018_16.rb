@@ -166,7 +166,6 @@ require 'set'
 hash = {}
 set = Set.new
 
-arrs = A.split("\n").reject {|x| x.strip.empty?}.each_slice(3).to_a.map {|a,b,c| [a.sub("Before: ", ""), b.split(" ").join(",").insert(0,"[").insert(-1, "]"), c.sub("After:  ", "")]}
 total = 0
 arrs.each do |before, instructions, after|
   opcode, count = number_of_registers(eval(before), eval(instructions), eval(after))
