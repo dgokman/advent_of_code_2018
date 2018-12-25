@@ -67,7 +67,6 @@ def attack_points(immunity, units, attack)
   immunity*units*attack
 end
 
-
 def damage_hash(group1, group2)
 
   attack_points = {}
@@ -89,7 +88,9 @@ end
 
 def effective_power_rank
   return unless @immune.length > 0 && @infection.length > 0
-  (@immune + @infection).compact.sort_by {|hash| hash[:units]*hash[:attack]}.reverse.map {|hash| "#{hash[:name]}-#{hash[:index]}"}
+  rank = (@immune + @infection).compact.map {
+    |hash| [[hash[:units]*hash[:attack],hash[:initiative]], "#{hash[:name]}-#{hash[:index]}"]}
+    .sort.reverse.transpose.last
 end
 
 def max_damage_hash(damage_hash)
@@ -103,7 +104,9 @@ def max_damage_hash(damage_hash)
     new_damage_hash = new_damage_hash.reject {|k,v| attacked.include?(k.split("->")[1])}
     new_damage_hash = new_damage_hash.select {|k,v| v == new_damage_hash.values.max}
     damage = new_damage_hash.values.max
-    next if  new_damage_hash.length == 0
+
+    next if damage == 0
+    next if new_damage_hash.length == 0
     if new_damage_hash.length == 1
       max_damage_hash["#{name}-#{i}"] = [new_damage_hash.to_a.first.first.split("->")[1], new_damage_hash.to_a.first.last]
       attacked << new_damage_hash.to_a.first.first.split("->")[1]
@@ -143,10 +146,7 @@ def attack(max_damage_hash)
       defender_name, defender_group = defender.split("-")
       defender_arr = eval("@#{defender_name}")
       defender_hash = defender_arr[defender_group.to_i-1]
-
-      if damage_hash["#{attacker}->#{defender}"].nil?
-        next
-      end
+      next if damage_hash["#{attacker}->#{defender}"].nil?
       defender_hash[:units] -= damage_hash["#{attacker}->#{defender}"]/defender_hash[:hit_points]
       if defender_hash[:units] <= 0
         defender_arr[defender_group.to_i-1] = nil
@@ -156,7 +156,6 @@ end
 
 parse_data
 
-
 # 1
 
 until @immune.compact.length == 0 || @infection.compact.length == 0
@@ -165,3 +164,28 @@ until @immune.compact.length == 0 || @infection.compact.length == 0
 end
 
 p @infection.map {|group| group ? group[:units] : 0}.inject(:+)
+
+# 2
+
+boost = 1
+total1, total2 = 0, 0
+until @infection.compact.length == 0
+  @infection = []
+  @immune = []
+
+  parse_data
+  @immune.each {|group| group[:attack] += boost}
+
+  until @immune.compact.length == 0 || @infection.compact.length == 0
+    damage_hash = damage_hash(@immune, @infection).merge(damage_hash(@infection, @immune))
+    attack(max_damage_hash(damage_hash))
+    break if @immune.map {|group| group ? group[:units] : 0}.inject(:+) == total1 && @infection.map {|group| group ? group[:units] : 0}.inject(:+) == total2
+    total1 = @immune.map {|group| group ? group[:units] : 0}.inject(:+)
+    total2 = @infection.map {|group| group ? group[:units] : 0}.inject(:+)
+  end
+  boost += 1
+end
+
+p total1
+
+
