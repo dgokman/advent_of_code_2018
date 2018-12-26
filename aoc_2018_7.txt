@@ -1,69 +1,101 @@
-A = File.read("aoc_2018_7.txt")
-L = "Z"
-alphabet = ("A"..L).to_a
-
-directions = {}
-
-A.split("\n").map {|x| x.split(" ").select {|a| alphabet.include?(a)}}.each do |a,b|
-  directions[b] ||= []
-  directions[b] << a
-end
-
-# 1
-
-str = (alphabet.to_a - directions.keys).sort.first
-
-until str.split("").sort == alphabet
-  (alphabet.to_a - str.split("")).each do |letter|
-    if directions[letter].nil? || directions[letter].all? {|a| str.include?(a)}
-      str += letter
-      break
-    end
-  end
-end      
-
-puts str
-
-# 2
-
-chart = []
-chart << [0, "F", "X", nil, nil, nil, ""]
-chart << [66, "M", "X", "O", nil, nil, "F"]
-chart << [84, "M", "C", "O", "D", "U", "FX"]
-  
-until chart.last.last.split("").sort == alphabet
-  chart.each do |_, w1, w2, w3, w4, w5, str|
-    (alphabet.to_a - str.split("")).each do |letter|
-      if [w1,w2,w3,w4,w5].include?(letter)
-        if !chart.last.last.include?(letter)
-          letter_arr = chart.select {|a| a.include?(letter)}.first
-          worker = letter_arr.index(letter)
-          letter_start_time = letter_arr.first
-          letter_end_time = letter_start_time + alphabet.index(letter)+61
-          new_arr = [letter_end_time, chart.last[1], chart.last[2], chart.last[3], chart.last[4], chart.last[5], chart.last.last+letter]
-          new_arr[worker] = nil
-          chart << new_arr
-        end  
-      elsif directions[letter].all? {|a| str.include?(a)} && !chart.last.last.include?(letter)
-        str_arr = chart.select {|a| a.include?(str)}.first
-        str_arr_idx = chart.index(str_arr)
-        new_str = str
-        until !directions[letter].all? {|a| new_str.include?(a)}
-          str_arr_idx -= 1
-          new_str = chart[str_arr_idx].last
-        end
-        str_arr_idx += 1
-        str_arr = chart[str_arr_idx]
-        
-        worker = str_arr.index(nil)
-        chart[str_arr_idx][worker] = letter
-        for idx in str_arr_idx+1..chart.length-1
-          chart[idx][worker] = letter
-        end
-        break
-      end
-    end
-  end
-end
-
-p chart.last.first 
+Step X must be finished before step C can begin.
+Step C must be finished before step G can begin.
+Step F must be finished before step G can begin.
+Step U must be finished before step Y can begin.
+Step O must be finished before step S can begin.
+Step D must be finished before step N can begin.
+Step M must be finished before step H can begin.
+Step J must be finished before step Q can begin.
+Step G must be finished before step R can begin.
+Step I must be finished before step N can begin.
+Step R must be finished before step K can begin.
+Step A must be finished before step Z can begin.
+Step Y must be finished before step L can begin.
+Step H must be finished before step P can begin.
+Step K must be finished before step S can begin.
+Step Z must be finished before step P can begin.
+Step T must be finished before step S can begin.
+Step N must be finished before step P can begin.
+Step E must be finished before step S can begin.
+Step S must be finished before step W can begin.
+Step W must be finished before step V can begin.
+Step L must be finished before step V can begin.
+Step P must be finished before step B can begin.
+Step Q must be finished before step V can begin.
+Step B must be finished before step V can begin.
+Step P must be finished before step Q can begin.
+Step S must be finished before step V can begin.
+Step C must be finished before step Q can begin.
+Step I must be finished before step H can begin.
+Step A must be finished before step E can begin.
+Step H must be finished before step Q can begin.
+Step G must be finished before step V can begin.
+Step N must be finished before step L can begin.
+Step R must be finished before step Q can begin.
+Step W must be finished before step L can begin.
+Step X must be finished before step L can begin.
+Step X must be finished before step J can begin.
+Step W must be finished before step P can begin.
+Step U must be finished before step B can begin.
+Step P must be finished before step V can begin.
+Step O must be finished before step P can begin.
+Step W must be finished before step Q can begin.
+Step S must be finished before step Q can begin.
+Step U must be finished before step Z can begin.
+Step Z must be finished before step T can begin.
+Step M must be finished before step T can begin.
+Step A must be finished before step P can begin.
+Step Z must be finished before step B can begin.
+Step N must be finished before step S can begin.
+Step H must be finished before step N can begin.
+Step J must be finished before step E can begin.
+Step M must be finished before step J can begin.
+Step R must be finished before step A can begin.
+Step A must be finished before step Y can begin.
+Step F must be finished before step V can begin.
+Step L must be finished before step P can begin.
+Step K must be finished before step L can begin.
+Step F must be finished before step P can begin.
+Step G must be finished before step L can begin.
+Step I must be finished before step Q can begin.
+Step C must be finished before step L can begin.
+Step I must be finished before step Y can begin.
+Step G must be finished before step B can begin.
+Step H must be finished before step L can begin.
+Step X must be finished before step U can begin.
+Step I must be finished before step K can begin.
+Step R must be finished before step N can begin.
+Step I must be finished before step L can begin.
+Step M must be finished before step I can begin.
+Step K must be finished before step V can begin.
+Step G must be finished before step E can begin.
+Step F must be finished before step B can begin.
+Step O must be finished before step Y can begin.
+Step Y must be finished before step Q can begin.
+Step F must be finished before step K can begin.
+Step N must be finished before step W can begin.
+Step O must be finished before step R can begin.
+Step N must be finished before step E can begin.
+Step M must be finished before step V can begin.
+Step H must be finished before step T can begin.
+Step Y must be finished before step T can begin.
+Step F must be finished before step J can begin.
+Step F must be finished before step O can begin.
+Step W must be finished before step B can begin.
+Step T must be finished before step E can begin.
+Step T must be finished before step P can begin.
+Step F must be finished before step M can begin.
+Step U must be finished before step I can begin.
+Step H must be finished before step S can begin.
+Step S must be finished before step P can begin.
+Step T must be finished before step W can begin.
+Step A must be finished before step N can begin.
+Step O must be finished before step N can begin.
+Step L must be finished before step B can begin.
+Step U must be finished before step K can begin.
+Step Z must be finished before step W can begin.
+Step X must be finished before step D can begin.
+Step Z must be finished before step L can begin.
+Step I must be finished before step T can begin.
+Step O must be finished before step W can begin.
+Step I must be finished before step B can begin.
