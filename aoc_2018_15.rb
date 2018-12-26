@@ -33,6 +33,9 @@ A = "################################
 #####################.##########
 ################################"
 
+
+# http://rosettacode.org/wiki/Dijkstra%27s_algorithm#Ruby
+
 class Graph
   Vertex = Struct.new(:name, :neighbours, :dist, :prev)
 
@@ -117,7 +120,7 @@ def create_graph(field)
         graph << ["#{i}-#{j}", "#{i+1}-#{j}",arrs[i+1][j]]
         graph << ["#{i}-#{j}", "#{i}-#{j+1}",arrs[i][j+1]]
         graph << ["#{i}-#{j}", "#{i}-#{j-1}",arrs[i][j-1]]
-      elsif i == 0 && j == arrs.length-1
+      elsif i == 0 && j == arrs[i].length-1
         graph << ["#{i}-#{j}", "#{i+1}-#{j}",arrs[i+1][j]]
         graph << ["#{i}-#{j}", "#{i}-#{j-1}",arrs[i][j-1]]
       elsif j == 0 && i < arrs.length-1
@@ -245,7 +248,7 @@ def move(y, x, field, second_move=false)
       end
         
       @visited << [y,x,end_y,end_x,field]
-      if correct_shortest_path.length == 6
+      if correct_shortest_path.length == 10
         break
       end
     end  
@@ -256,6 +259,8 @@ def move(y, x, field, second_move=false)
 
   selected_correct_shortest_path[0]
 end
+
+# 1
 
 [A].each do |cons|
   initial_field = cons.split("\n").map {|x| x.split("")}
@@ -313,7 +318,89 @@ end
    
     @count += 1   
   end
+end 
+
+
+# 2
+
+def fight
+  [A].each do |cons|
+    initial_field = cons.split("\n").map {|x| x.split("")}
+    field = Marshal.load(Marshal.dump(initial_field))
+
+    @hit_points = Hash.new(200)
+    @count = 0
+    @visited = Set.new
+    
+    loop do
+      moved = Set.new
+     
+      for y in 0..field.length-1
+        for x in 0..field[y].length-1
+          if (field[y][x] == "G" || field[y][x] == "E") && !moved.include?([y,x])
+            move = move(y,x,field)
+            if move.last == "attack"
+              enemy_y, enemy_x = move[0], move[1]
+              if field[y][x] == "G" 
+                @hit_points[[enemy_y,enemy_x]] -= 3
+              else
+                @hit_points[[enemy_y,enemy_x]] -= @elf_power
+              end  
+              if @hit_points[[enemy_y,enemy_x]] <= 0
+                if field[y][x] == "G"
+                  return "DEAD ELF, NEED MORE POWER!!"
+                end   
+                field[enemy_y][enemy_x] = "."
+                @hit_points.delete([enemy_y,enemy_x])
+              end  
+            else  
+              new_y, new_x = move
+              if new_y != y || new_x != x
+                letter = field[y][x]
+                field[y][x] = "."
+                field[new_y][new_x] = letter
+
+                new_move = move(new_y,new_x,field,true)
+                if new_move && new_move.last == "attack"
+                  
+                  enemy_y, enemy_x = new_move[0], new_move[1]
+                  if field[new_y][new_x] == "G"
+                    @hit_points[[enemy_y,enemy_x]] -= 3
+                  else  
+                    @hit_points[[enemy_y,enemy_x]] -= @elf_power
+                  end  
+                  if @hit_points[[enemy_y,enemy_x]] <= 0
+                    if field[y][x] == "G"
+                      return "DEAD ELF, NEED MORE POWER!!"
+                    end
+                    field[enemy_y][enemy_x] = "."
+                    @hit_points.delete([enemy_y,enemy_x])
+                  end
+                end  
+
+                moved << [new_y,new_x]
+              end  
+              @hit_points[[new_y,new_x]] = @hit_points[[y,x]]
+              @hit_points.delete([y,x]) unless new_y == y && new_x == x
+            end  
+          end
+        end
+      end
+
+      if field.flatten.count("G") == 0
+        puts @count*@hit_points.values.inject(:+)
+        return "DONE"
+      end
+     
+      @count += 1      
+    end
+  end
+end
+
+@elf_power = 10
+loop do
+  a = fight
+  puts a
+  break if a == "DONE"
+  @elf_power += 1
 end      
-
-
-

@@ -9,6 +9,8 @@ a,b,c,_ = arr.detect {|a,b,c,d| d == max}
 
 p arr.count {|e,f,g,_| (a-e).abs + (b-f).abs + (c-g).abs <= max }
 
+# 2
+
 # plug in numbers until a max count is found, then subtract until count is less than max count
 
 count = 0
@@ -32,9 +34,3 @@ loop do
 end
 
 p a1+b1+c1+1
-
-
-
-
-
-
